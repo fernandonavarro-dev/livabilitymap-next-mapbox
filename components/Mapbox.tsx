@@ -160,8 +160,10 @@ const Mapbox: React.FC<MapboxProps> = ({
     const newMarkers: mapboxgl.Marker[] = [];
 
     if (map.current && state.loaded && recommendations) {
+      console.log('Recommendations:', recommendations);
       recommendations.forEach((recommendation: any) => {
         if (recommendation.coordinates && map.current) {
+          console.log('Calculating distance for:', recommendation);
           // Calculate the distance between the center and the recommendation's coordinates
           const recommendationPoint = turf.point([
             recommendation.coordinates.longitude,
@@ -178,11 +180,26 @@ const Mapbox: React.FC<MapboxProps> = ({
 
           // Add a marker to the map only if the distance is within the radius
           if (distanceInMiles <= radius) {
+            console.log('Distance:', distanceInMiles, 'Radius:', radius);
+            // Create a popup with the recommendation's information
+            const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(
+              `<h3>${recommendation.name}</h3>` +
+                `<p>${recommendation.address}</p>` +
+                `<p>${recommendation.description}</p>`
+            );
+            console.log(
+              'Popup data:',
+              recommendation.name,
+              recommendation.address,
+              recommendation.description
+            ); // Add this log
+            // Create a marker and attach the popup to it
             const marker = new mapboxgl.Marker()
               .setLngLat([
                 recommendation.coordinates.longitude,
                 recommendation.coordinates.latitude,
               ])
+              .setPopup(popup) // Attach the popup to the marker
               .addTo(map.current);
 
             // Add the marker instance to the newMarkers array
